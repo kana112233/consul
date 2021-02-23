@@ -38,6 +38,8 @@ type R struct {
 	output []string
 }
 
+func (r *R) Helper() {}
+
 func (r *R) FailNow() {
 	r.fail = true
 	runtime.Goexit()
