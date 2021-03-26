@@ -24,6 +24,7 @@ const (
 // Listener is the implementation of a specific proxy listener. It has pluggable
 // Listen and Dial methods to suit public mTLS vs upstream semantics. It handles
 // the lifecycle of the listener and all connections opened through it
+//TODO markan FIXUP Listener, bindAddr and NewPublicListener chain
 type Listener struct {
 	// Service is the connect service instance to use.
 	Service *connect.Service
@@ -87,6 +88,7 @@ func NewPublicListener(svc *connect.Service, cfg PublicListenerConfig,
 
 // NewUpstreamListener returns a Listener setup to listen locally for TCP
 // connections that are proxied to a discovered Connect service instance.
+// TODO markan: do I need a UDS listener option here?
 func NewUpstreamListener(svc *connect.Service, client *api.Client,
 	cfg UpstreamConfig, logger hclog.Logger) *Listener {
 	return newUpstreamListenerWithResolver(svc, cfg,
