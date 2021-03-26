@@ -3,6 +3,7 @@ package structs
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/lib"
@@ -303,7 +304,11 @@ type Upstream struct {
 
 	// LocalBindPort is the ip address a side-car proxy should listen on for traffic
 	// destined for this upstream service. Required.
-	LocalBindPort int `alias:"local_bind_port"`
+	LocalBindPort int `json:",omitempty" alias:"local_bind_port"`
+
+	// These are exclusive with LocalBindAddress/LocalBindPort
+	LocalBindSocketPath string `json:",omitempty" alias:"local_bind_socket_path"`
+	LocalBindSocketMode uint32 `json:",omitempty" alias:"local_bind_socket_mode"`
 
 	// Config is an opaque config that is specific to the proxy process being run.
 	// It can be used to pass arbitrary configuration for this specific upstream
@@ -333,6 +338,9 @@ func (t *Upstream) UnmarshalJSON(data []byte) (err error) {
 		LocalBindAddressSnake string `json:"local_bind_address"`
 		LocalBindPortSnake    int    `json:"local_bind_port"`
 
+		LocalBindSocketPathSnake string `json:"local_bind_socket_path"`
+		LocalBindSocketModeSnake uint32 `json:"local_bind_socket_mode"`
+
 		MeshGatewaySnake MeshGatewayConfig `json:"mesh_gateway"`
 
 		*Alias
@@ -356,6 +364,12 @@ func (t *Upstream) UnmarshalJSON(data []byte) (err error) {
 	}
 	if t.LocalBindPort == 0 {
 		t.LocalBindPort = aux.LocalBindPortSnake
+	}
+	if t.LocalBindSocketPath == "" {
+		t.LocalBindSocketPath = aux.LocalBindSocketPathSnake
+	}
+	if t.LocalBindSocketMode == 0 {
+		t.LocalBindSocketMode = aux.LocalBindSocketModeSnake
 	}
 	if t.MeshGateway.Mode == "" {
 		t.MeshGateway.Mode = aux.MeshGatewaySnake.Mode
@@ -398,6 +412,8 @@ func (u *Upstream) ToAPI() api.Upstream {
 		Datacenter:           u.Datacenter,
 		LocalBindAddress:     u.LocalBindAddress,
 		LocalBindPort:        u.LocalBindPort,
+		LocalBindSocketPath:  u.LocalBindSocketPath,
+		LocalBindSocketMode:  u.LocalBindSocketMode,
 		Config:               u.Config,
 		MeshGateway:          u.MeshGateway.ToAPI(),
 	}
@@ -416,6 +432,27 @@ func (u *Upstream) ToKey() UpstreamKey {
 		DestinationName:      u.DestinationName,
 		Datacenter:           u.Datacenter,
 	}
+}
+
+func (u Upstream) HasLocalPortOrSocket() bool {
+	return (u.LocalBindPort != 0 || u.LocalBindSocketPath != "")
+}
+
+func (u Upstream) UpstreamIsUnixSocket() bool {
+	return (u.LocalBindPort == 0 && u.LocalBindAddress == "" && u.LocalBindSocketPath != "")
+}
+
+func (u Upstream) UpstreamAddressToString() string {
+	if u.UpstreamIsUnixSocket() {
+		return u.LocalBindSocketPath
+	}
+
+	addr := u.LocalBindAddress
+	if addr == "" {
+		addr = "127.0.0.1"
+	}
+	addr = net.JoinHostPort(addr, fmt.Sprintf("%d", u.LocalBindPort))
+	return addr
 }
 
 type UpstreamKey struct {
@@ -471,6 +508,8 @@ func UpstreamFromAPI(u api.Upstream) Upstream {
 		Datacenter:           u.Datacenter,
 		LocalBindAddress:     u.LocalBindAddress,
 		LocalBindPort:        u.LocalBindPort,
+		LocalBindSocketPath:  u.LocalBindSocketPath,
+		LocalBindSocketMode:  u.LocalBindSocketMode,
 		Config:               u.Config,
 	}
 }
