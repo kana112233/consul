@@ -52,6 +52,7 @@ require (
 	github.com/hashicorp/mdns v1.0.3 // indirect
 	github.com/hashicorp/memberlist v0.2.3
 	github.com/hashicorp/net-rpc-msgpackrpc v0.0.0-20151116020338-a14192a58a69
+	github.com/hashicorp/protoc-gen-go-binary v0.0.0-20200316174223-e4c249d51dbb // indirect
 	github.com/hashicorp/raft v1.2.0
 	github.com/hashicorp/raft-autopilot v0.1.2
 	github.com/hashicorp/raft-boltdb v0.0.0-20171010151810-6e5ba93211ea
