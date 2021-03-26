@@ -142,6 +142,8 @@ func UpstreamToStructs(s Upstream) structs.Upstream {
 	t.Datacenter = s.Datacenter
 	t.LocalBindAddress = s.LocalBindAddress
 	t.LocalBindPort = int(s.LocalBindPort)
+	t.LocalBindSocketPath = s.LocalBindSocketPath
+	t.LocalBindSocketMode = uint32(s.LocalBindSocketMode)
 	t.Config = ProtobufTypesStructToMapStringInterface(s.Config)
 	t.MeshGateway = MeshGatewayConfigToStructs(s.MeshGateway)
 	t.CentrallyConfigured = s.CentrallyConfigured
@@ -155,6 +157,8 @@ func NewUpstreamFromStructs(t structs.Upstream) Upstream {
 	s.Datacenter = t.Datacenter
 	s.LocalBindAddress = t.LocalBindAddress
 	s.LocalBindPort = int32(t.LocalBindPort)
+	s.LocalBindSocketPath = t.LocalBindSocketPath
+	s.LocalBindSocketMode = int32(t.LocalBindSocketMode)
 	s.Config = MapStringInterfaceToProtobufTypesStruct(t.Config)
 	s.MeshGateway = NewMeshGatewayConfigFromStructs(t.MeshGateway)
 	s.CentrallyConfigured = t.CentrallyConfigured

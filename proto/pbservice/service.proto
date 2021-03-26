@@ -129,8 +129,8 @@ message Upstream {
     bool CentrallyConfigured = 9;
 
     // TODO markan may need mode as well. Ths is exclusive to local bind address and port...
-    string LocalBindSocket = 10;
-    int32 LocalBindMode = 11;
+    string LocalBindSocketPath = 10;
+    int32 LocalBindSocketMode = 11;
 }
 
 // ServiceConnect are the shared Connect settings between all service

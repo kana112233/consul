@@ -154,6 +154,9 @@ type Upstream struct {
 	// CentrallyConfigured indicates whether the upstream was defined in a proxy
 	// instance registration or whether it was generated from a config entry.
 	CentrallyConfigured bool `protobuf:"varint,9,opt,name=CentrallyConfigured,proto3" json:"CentrallyConfigured,omitempty"`
+	// TODO markan may need mode as well. Ths is exclusive to local bind address and port...
+	LocalBindSocketPath string `protobuf:"bytes,10,opt,name=LocalBindSocketPath,proto3" json:"LocalBindSocketPath,omitempty"`
+	LocalBindSocketMode int32  `protobuf:"varint,11,opt,name=LocalBindSocketMode,proto3" json:"LocalBindSocketMode,omitempty"`
 }
 
 func (m *Upstream) Reset()         { *m = Upstream{} }
@@ -813,6 +816,18 @@ func (m *Upstream) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.LocalBindSocketMode != 0 {
+		i = encodeVarintService(dAtA, i, uint64(m.LocalBindSocketMode))
+		i--
+		dAtA[i] = 0x58
+	}
+	if len(m.LocalBindSocketPath) > 0 {
+		i -= len(m.LocalBindSocketPath)
+		copy(dAtA[i:], m.LocalBindSocketPath)
+		i = encodeVarintService(dAtA, i, uint64(len(m.LocalBindSocketPath)))
+		i--
+		dAtA[i] = 0x52
+	}
 	if m.CentrallyConfigured {
 		i--
 		if m.CentrallyConfigured {
@@ -1454,6 +1469,13 @@ func (m *Upstream) Size() (n int) {
 	n += 1 + l + sovService(uint64(l))
 	if m.CentrallyConfigured {
 		n += 2
+	}
+	l = len(m.LocalBindSocketPath)
+	if l > 0 {
+		n += 1 + l + sovService(uint64(l))
+	}
+	if m.LocalBindSocketMode != 0 {
+		n += 1 + sovService(uint64(m.LocalBindSocketMode))
 	}
 	return n
 }
@@ -2326,6 +2348,57 @@ func (m *Upstream) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.CentrallyConfigured = bool(v != 0)
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LocalBindSocketPath", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.LocalBindSocketPath = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 11:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LocalBindSocketMode", wireType)
+			}
+			m.LocalBindSocketMode = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.LocalBindSocketMode |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipService(dAtA[iNdEx:])
