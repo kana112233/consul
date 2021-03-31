@@ -1613,6 +1613,10 @@ func TestConfigSnapshotIngressGateway(t testing.T) *ConfigSnapshot {
 	return testConfigSnapshotIngressGateway(t, true, "tcp", "default")
 }
 
+func TestConfigSnapshotIngressGatewayWithUDS(t testing.T) *ConfigSnapshot {
+	return testConfigSnapshotIngressGatewayWithUDS(t, true, "tcp", "default")
+}
+
 func TestConfigSnapshotIngressGatewayNoServices(t testing.T) *ConfigSnapshot {
 	return testConfigSnapshotIngressGateway(t, false, "tcp", "default")
 }
@@ -1630,6 +1634,7 @@ func testConfigSnapshotIngressGateway(
 	additionalEntries ...structs.ConfigEntry,
 ) *ConfigSnapshot {
 	roots, leaf := TestCerts(t)
+
 	snap := &ConfigSnapshot{
 		Kind:       structs.ServiceKindIngressGateway,
 		Service:    "ingress-gateway",
@@ -1650,6 +1655,40 @@ func testConfigSnapshotIngressGateway(
 						DestinationName:  "db",
 						LocalBindPort:    9191,
 						LocalBindAddress: "2.3.4.5",
+					},
+				},
+			},
+		}
+	}
+	return snap
+}
+
+func testConfigSnapshotIngressGatewayWithUDS(
+	t testing.T, populateServices bool, protocol, variation string,
+	additionalEntries ...structs.ConfigEntry,
+) *ConfigSnapshot {
+	roots, leaf := TestCerts(t)
+
+	snap := &ConfigSnapshot{
+		Kind:       structs.ServiceKindIngressGateway,
+		Service:    "ingress-gateway",
+		ProxyID:    structs.NewServiceID("ingress-gateway", nil),
+		Address:    "1.2.3.4",
+		Roots:      roots,
+		Datacenter: "dc1",
+	}
+	if populateServices {
+		snap.IngressGateway = configSnapshotIngressGateway{
+			ConfigSnapshotUpstreams: setupTestVariationConfigEntriesAndSnapshot(
+				t, variation, leaf, additionalEntries...,
+			),
+			Upstreams: map[IngressListenerKey]structs.Upstreams{
+				{protocol, 9191}: {
+					{
+						// We rely on this one having default type in a few tests...
+						DestinationName:     "db",
+						LocalBindSocketPath: "/tmp/test_socket_unix",
+						LocalBindSocketMode: 0640,
 					},
 				},
 			},
