@@ -76,7 +76,7 @@ func (s *Server) listenersFromSnapshotConnectProxy(cInfo connectionInfo, cfgSnap
 			port = cfgSnap.Proxy.TransparentProxy.OutboundListenerPort
 		}
 
-		// TODO markan Investigate UDS for TransparentProxy, probably should not be part of first pass.
+		// TODO markan This shouldn't ever use a unix domain socket.
 		outboundListener = makePortListener(OutboundListenerName, "127.0.0.1", port, envoy_core_v3.TrafficDirection_OUTBOUND)
 		outboundListener.FilterChains = make([]*envoy_listener_v3.FilterChain, 0)
 		outboundListener.ListenerFilters = []*envoy_listener_v3.ListenerFilter{
@@ -293,6 +293,7 @@ func (s *Server) listenersFromSnapshotConnectProxy(cInfo connectionInfo, cfgSnap
 	// Configure additional listener for exposed check paths
 	for _, path := range paths {
 		clusterName := LocalAppClusterName
+		// TODO markan look through this code in more detail
 		if path.LocalPathPort != cfgSnap.Proxy.LocalServicePort {
 			clusterName = makeExposeClusterName(path.LocalPathPort)
 		}

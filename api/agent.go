@@ -81,7 +81,7 @@ type AgentService struct {
 	Tags              []string
 	Meta              map[string]string
 	Port              int
-	Address           string
+	Address           string                    // TODO markan SocketPath?
 	TaggedAddresses   map[string]ServiceAddress `json:",omitempty"`
 	Weights           AgentWeights
 	EnableTagOverride bool
@@ -117,7 +117,7 @@ type AgentServiceConnectProxyConfig struct {
 	DestinationServiceName string                 `json:",omitempty"`
 	DestinationServiceID   string                 `json:",omitempty"`
 	LocalServiceAddress    string                 `json:",omitempty"`
-	LocalServicePort       int                    `json:",omitempty"`
+	LocalServicePort       int                    `json:",omitempty"` // TODO markan LocalSocketPath?
 	Mode                   ProxyMode              `json:",omitempty"`
 	TransparentProxy       TransparentProxyConfig `json:",omitempty"`
 	Config                 map[string]interface{} `json:",omitempty" bexpr:"-"`
