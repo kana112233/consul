@@ -148,7 +148,7 @@ func (r *fakeRequest) CacheInfo() cache.RequestInfo {
 	}
 }
 
-func (r *fakeRequest) NewMaterializer() *Materializer {
+func (r *fakeRequest) NewMaterializer() (*Materializer, error) {
 	return NewMaterializer(Deps{
 		View:   &fakeView{srvs: make(map[string]*pbservice.CheckServiceNode)},
 		Client: r.client,
@@ -164,7 +164,7 @@ func (r *fakeRequest) NewMaterializer() *Materializer {
 			}
 			return req
 		},
-	})
+	}), nil
 }
 
 func (r *fakeRequest) Type() string {
