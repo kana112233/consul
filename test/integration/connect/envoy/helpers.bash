@@ -558,13 +558,9 @@ function docker_consul_exec {
 function get_envoy_pid {
   local BOOTSTRAP_NAME=$1
   local DC=${2:-primary}
-  run ps aux
+  run pgrep -f "envoy -c /workdir/$DC/envoy/${BOOTSTRAP_NAME}-bootstrap.json"
   [ "$status" == 0 ]
-  echo "$output" 1>&2
-  PID="$(echo "$output" | grep "envoy -c /workdir/$DC/envoy/${BOOTSTRAP_NAME}-bootstrap.json" | awk '{print $1}')"
-  [ -n "$PID" ]
-
-  echo "$PID"
+  echo "$output"
 }
 
 function kill_envoy {
